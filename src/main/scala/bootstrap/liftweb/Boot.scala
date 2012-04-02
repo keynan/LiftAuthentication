@@ -31,14 +31,19 @@ class Boot {
     LiftRules.addToPackages("code")
 		LiftRules.addToPackages("ca.dualityStudios.liftAuthentication")
 		
-		Schemifier.schemify(true, Schemifier.infoF(_), User)
+		Schemifier.schemify(true, Schemifier.infoF(_), User, CrudModel)
 		
     // Build SiteMap
     var entries = List(
 			Menu.i("Home") / "index", // the simple way to declare a menu
+			User.loginMenu.open_!,
+			User.logoutMenu.open_!,
+			User.signUpMenu.open_!,
+			User.changePropertiesMenu.open_!,
+			User.changePasswordMenu.open_!,
 			Menu(Loc("Static", Link(List("static"), true, "/static/index"), "Static Content"))
 		)
-    entries = entries ::: User.menus.map(x => x.toMenu)
+    entries = entries ::: CrudModel.menus.map(x => x.toMenu)
 		LiftRules.setSiteMap(SiteMap(entries:_*))
 		
     LiftRules.jsArtifacts = net.liftweb.http.js.jquery.JQuery14Artifacts
@@ -46,5 +51,6 @@ class Boot {
     LiftRules.ajaxEnd = Full(() => LiftRules.jsArtifacts.hide("ajax-loader").cmd)
     LiftRules.early.append(_.setCharacterEncoding("UTF-8"))
 
+		LiftRules.htmlProperties.default.set((r: Req) =>new Html5Properties(r.userAgent))
   }
 }
