@@ -4,6 +4,7 @@ import scala.xml.{NodeSeq, Text}
 import net.liftweb.common.{Box, Full, Empty, Loggable}
 import net.liftweb.mapper._
 import net.liftweb.sitemap.{Menu, Loc}
+import net.liftweb.sitemap.Menu.{Menuable}
 import net.liftweb.sitemap.Loc.{DispatchLocSnippets}
 
 import net.liftweb.http.{S, SHtml, RequestVar}
@@ -24,7 +25,16 @@ trait MetaLocalCredentials[OT <: LocalCredentials[OT]]
 	val prefix = "user_managment"
 	val loginPath = prefix :: "login" :: Nil
 	val loginPathString = "Login"
-	def loginMenu: Box[Menu] = 
+	def loginMenu: Box[Menuable] = {
+		val menu = Menu(loginPathString, "Login").
+			path(loginPath.mkString("/","/","")) >>
+			snippetDispatch >>
+			Loc.Template(loginTemplate) >>
+			testUserIsLoggedOut_?
+		Full(menu)
+	}
+
+/*	
 		Full(Menu(
 			Loc(
 				"Login", 
@@ -33,7 +43,7 @@ trait MetaLocalCredentials[OT <: LocalCredentials[OT]]
 				List(snippetDispatch, Loc.Template(loginTemplate), testUserIsLoggedOut_?)
 			)
 		))
-
+*/
 	val logoutPath = prefix :: "logout" :: Nil
 	val logoutPathString = "Logout"
 	def logoutMenu: Box[Menu] = 

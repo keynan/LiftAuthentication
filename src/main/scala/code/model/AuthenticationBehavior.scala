@@ -18,6 +18,8 @@ trait MetaAuthenticationBehavior[OwnerType <: AuthenticationBehavior[OwnerType]]
 		curUserPK(user.primaryKey)
 	}
 	
+	def logUserIn = logInUser _
+	
 	def homePage = "/"
 	def logUserOut() = {
 		curUserPK.remove()
@@ -55,6 +57,8 @@ trait MetaAuthenticationBehavior[OwnerType <: AuthenticationBehavior[OwnerType]]
 	def isLoggedIn_?() = {
 		! curUserPK.is.isEmpty
 	}
+	
+	
 }
 
 trait AuthenticationBehavior[OwnerType <: AuthenticationBehavior[OwnerType]]

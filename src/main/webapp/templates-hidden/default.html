@@ -10,9 +10,17 @@
   <body>
     <div class="lift:Menu.builder"></div>
     <div class="lift:Msgs?showAll=true"></div>
-
+		
     <div id="content"></div>
-
+		
+		<div class="lift:Auth.isLoggedIn">
+			<span class="lift:Menu.item?name=Logout">Logout</span>
+		</div>
+		<div class="lift:Auth.isNotLoggedIn">
+			<span class="lift:Menu.item?name=Login">Login</span>
+			<span class="lift:Menu.item?name=Sign+Up">Sign Up</span>
+		</div>
+		
     <hr />
     <h4>
       <a href="http://www.liftweb.net"><i>Lift</i></a> 

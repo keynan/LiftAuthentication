@@ -10,6 +10,7 @@ import sitemap._
 import Loc._
 import mapper._
 
+import ca.dualityStudios.liftAuthentication._
 import ca.dualityStudios.liftAuthentication.model._
 
 /**
@@ -33,10 +34,10 @@ class Boot {
 		
 		Schemifier.schemify(true, Schemifier.infoF(_), User, CrudModel)
 		
-    // Build SiteMap
+		// Build SiteMap
     var entries = List(
 			Menu.i("Home") / "index", // the simple way to declare a menu
-			User.loginMenu.open_!,
+			User.loginMenu.open_! >> Hidden,
 			User.logoutMenu.open_!,
 			User.signUpMenu.open_!,
 			User.changePropertiesMenu.open_!,
