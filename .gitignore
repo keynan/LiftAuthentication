@@ -1,7 +1,6 @@
-
+/sbt*
 /lib_managed
 /project/boot
 /project/build/target
 /target
-/lift_proto.db.h2.db
-/lift_proto.db.lock.db
+/lift_proto.db.*
