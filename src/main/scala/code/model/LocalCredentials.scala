@@ -46,7 +46,7 @@ trait MetaLocalCredentials[OT <: LocalCredentials[OT]]
 */
 	val logoutPath = prefix :: "logout" :: Nil
 	val logoutPathString = "Logout"
-	def logoutMenu: Box[Menu] = {
+	def logoutMenu: Box[Menuable] = {
 		Full(Menu(logoutPathString, "Logout").
 			path(logoutPath.mkString("/", "/", "")) >> 
 			Loc.Template(logUserOut) >>
@@ -60,7 +60,7 @@ trait MetaLocalCredentials[OT <: LocalCredentials[OT]]
 	
 	val signUpPath = prefix :: "signUp" :: Nil
 	val signUpPathString = "Sign Up"
-	def signUpMenu: Box[Menu] = {
+	def signUpMenu: Box[Menuable] = {
 		Full(Menu(signUpPathString, "Sign Up").
 			path(signUpPath.mkString("/", "/", "")) >> 
 			snippetDispatch >>
@@ -71,7 +71,7 @@ trait MetaLocalCredentials[OT <: LocalCredentials[OT]]
 
 	val changePropertiesPath = prefix :: "update" :: Nil
 	val changePropertiesString = "Update Properties"
-	def changePropertiesMenu: Box[Menu] = {
+	def changePropertiesMenu: Box[Menuable] = {
 		Full(Menu(changePropertiesString, "Edit User Properties").
 			path(changePropertiesPath.mkString("/", "/", "")) >>
 			snippetDispatch >>
@@ -82,7 +82,7 @@ trait MetaLocalCredentials[OT <: LocalCredentials[OT]]
 	
 	val changePasswordPath = prefix :: "change" :: "password" :: Nil
 	val changePasswordString = "Change Password"
-	def changePasswordMenu: Box[Menu] = Full(Menu(changePasswordString, "Edit User Password").
+	def changePasswordMenu: Box[Menuable] = Full(Menu(changePasswordString, "Edit User Password").
 		path(changePasswordPath.mkString("/", "/", "")) >> 
 		snippetDispatch >>
 		Loc.Template(changePasswordTemplate) >>
