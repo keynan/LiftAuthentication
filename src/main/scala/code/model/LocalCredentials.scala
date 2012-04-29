@@ -166,13 +166,13 @@ trait MetaLocalCredentials[OT <: LocalCredentials[OT]]
 		logger.info("logging in: search by user name: " + usernameVar.is)
 		find(By(username, usernameVar.is)) match { 
 			case Full(user) if(user.password.match_?(passwordVar.is)) => {
-				logger.info("logging in: user " + user.id + " found")
+				logger.info("logging in: user " + user.primaryKey.openOr(0) + " found")
 				logInUser(user)
 				S.redirectTo(homePage, () => S.notice("Successful Login."))
 			}
 			case _ => {
 				logger.info("logging in: failed. available users")
-				User.findAll().foreach{ user => logger.info(user.username) }
+				findAll().foreach{ user => logger.info(user.username) }
 				S.notice("Login Failed.")
 			}
 		}
