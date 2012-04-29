@@ -26,8 +26,8 @@ trait MetaLocalCredentials[OT <: LocalCredentials[OT]]
 	val loginPath = prefix :: "login" :: Nil
 	val loginPathString = "Login"
 	def loginMenu: Box[Menuable] = {
-		val menu = Menu(loginPathString, "Login").
-			path(loginPath.mkString("/","/","")) >>
+		val menu = Menu(loginPathString, "Login") /
+			loginPath.mkString("/","/","") >>
 			snippetDispatch >>
 			Loc.Template(loginTemplate) >>
 			testUserIsLoggedOut_?
