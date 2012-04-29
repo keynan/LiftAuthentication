@@ -46,52 +46,48 @@ trait MetaLocalCredentials[OT <: LocalCredentials[OT]]
 */
 	val logoutPath = prefix :: "logout" :: Nil
 	val logoutPathString = "Logout"
-	def logoutMenu: Box[Menu] = 
-		Full(Menu(
-			Loc(
-				"Logout", 
-				logoutPath, 
-				logoutPathString, 
-				List(Loc.Template(logUserOut), testUserIsLoggedIn_?)
-			)
-		))
+	def logoutMenu: Box[Menu] = {
+		Full(Menu(logoutPathString, "Logout").
+			path(logoutPath.mkString("/", "/", "")) >> 
+			Loc.Template(logUserOut) >>
+			testUserIsLoggedIn_?
+		)
+	}
+	
 	
 	lazy val testUserIsLoggedIn_? = Loc.If(() => isLoggedIn_?, () => S.redirectTo(homePage, () => S.notice(S.??("user.not.logged.in"))))
 	lazy val testUserIsLoggedOut_? = Loc.If(() => !isLoggedIn_?, () => S.redirectTo(logoutMenu.toString))
 	
 	val signUpPath = prefix :: "signUp" :: Nil
 	val signUpPathString = "Sign Up"
-	def signUpMenu: Box[Menu] = 
-		Full(Menu(
-			Loc(
-				"Sign Up", 
-				signUpPath, 
-				signUpPathString, 
-				List(snippetDispatch, Loc.Template(signUpTemplate), testUserIsLoggedOut_?)
-			)
-		))
+	def signUpMenu: Box[Menu] = {
+		Full(Menu(signUpPathString, "Sign Up").
+			path(signUpPath.mkString("/", "/", "")) >> 
+			snippetDispatch >>
+			Loc.Template(signUpTemplate) >>
+			testUserIsLoggedOut_?
+		)
+	}
 
 	val changePropertiesPath = prefix :: "update" :: Nil
 	val changePropertiesString = "Update Properties"
-	def changePropertiesMenu: Box[Menu] = Full(Menu(
-		Loc(
-			"Edit User Properties", 
-			changePropertiesPath, 
-			changePropertiesString, 
-			List(snippetDispatch, Loc.Template(changePropertiesTemplate), testUserIsLoggedIn_?)
+	def changePropertiesMenu: Box[Menu] = {
+		Full(Menu(changePropertiesString, "Edit User Properties").
+			path(changePropertiesPath.mkString("/", "/", "")) >>
+			snippetDispatch >>
+			Loc.Template(changePropertiesTemplate) >>
+			testUserIsLoggedIn_?
 		)
-	))
+	}
 	
 	val changePasswordPath = prefix :: "change" :: "password" :: Nil
 	val changePasswordString = "Change Password"
-	def changePasswordMenu: Box[Menu] = Full(Menu(
-		Loc(
-			"Edit User Password", 
-			changePasswordPath, 
-			changePasswordString, 
-			List(snippetDispatch, Loc.Template(changePasswordTemplate), testUserIsLoggedIn_?)
-		)
-	))
+	def changePasswordMenu: Box[Menu] = Full(Menu(changePasswordString, "Edit User Password").
+		path(changePasswordPath.mkString("/", "/", "")) >> 
+		snippetDispatch >>
+		Loc.Template(changePasswordTemplate) >>
+		testUserIsLoggedIn_?
+	)
 	
 	///////////// Behavour ///////////////////////////////////////////////
 
