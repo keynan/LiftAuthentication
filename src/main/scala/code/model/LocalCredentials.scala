@@ -22,12 +22,24 @@ trait MetaLocalCredentials[OT <: LocalCredentials[OT]]
 	
 	//////////////// MENUs /////////////////////////////////////////////
 
+	import net.liftweb.sitemap.Menu._
+	
+	def applyPath(menu: Menuable with WithSlash, pathing: List[String]): Menuable with WithSlash = {
+		def enPath(x: String, y: Menuable with WithSlash): Menuable with WithSlash = y / x
+		pathing.foldRight(menu)(enPath)
+	}
+	/*{
+		pathing match {
+			case Nil => menu
+			case x::xs => applyPath((menu / x), xs)
+		}
+	}*/
+
 	val prefix = "user_managment"
-	val loginPath = prefix :: "login" :: Nil
+	val loginPath = "login" :: Nil
 	val loginPathString = "Login"
 	def loginMenu: Box[Menuable] = {
-		val menu = Menu(loginPathString, "Login") /
-			loginPath.mkString("/","/","") >>
+		val menu = applyPath(Menu(loginPathString, "Login") / prefix,  loginPath) >>
 			snippetDispatch >>
 			Loc.Template(loginTemplate) >>
 			testUserIsLoggedOut_?
@@ -44,13 +56,13 @@ trait MetaLocalCredentials[OT <: LocalCredentials[OT]]
 			)
 		))
 */
-	val logoutPath = prefix :: "logout" :: Nil
+	val logoutPath = "logout" :: Nil
 	val logoutPathString = "Logout"
 	def logoutMenu: Box[Menuable] = {
-		Full(Menu(logoutPathString, "Logout").
-			path(logoutPath.mkString("/", "/", "")) >> 
-			Loc.Template(logUserOut) >>
-			testUserIsLoggedIn_?
+		Full(
+			applyPath(Menu(logoutPathString, "Logout") / prefix, logoutPath) >> 
+				Loc.Template(logUserOut) >>
+				testUserIsLoggedIn_?
 		)
 	}
 	
@@ -58,32 +70,32 @@ trait MetaLocalCredentials[OT <: LocalCredentials[OT]]
 	lazy val testUserIsLoggedIn_? = Loc.If(() => isLoggedIn_?, () => S.redirectTo(homePage, () => S.notice(S.??("user.not.logged.in"))))
 	lazy val testUserIsLoggedOut_? = Loc.If(() => !isLoggedIn_?, () => S.redirectTo(logoutMenu.toString))
 	
-	val signUpPath = prefix :: "signUp" :: Nil
+	val signUpPath = "signUp" :: Nil
 	val signUpPathString = "Sign Up"
 	def signUpMenu: Box[Menuable] = {
-		Full(Menu(signUpPathString, "Sign Up").
-			path(signUpPath.mkString("/", "/", "")) >> 
-			snippetDispatch >>
-			Loc.Template(signUpTemplate) >>
-			testUserIsLoggedOut_?
+		Full(
+			applyPath(Menu(signUpPathString, "Sign Up") / prefix, signUpPath) >> 
+				snippetDispatch >>
+				Loc.Template(signUpTemplate) >>
+				testUserIsLoggedOut_?
 		)
 	}
 
-	val changePropertiesPath = prefix :: "update" :: Nil
+	val changePropertiesPath = "update" :: Nil
 	val changePropertiesString = "Update Properties"
 	def changePropertiesMenu: Box[Menuable] = {
-		Full(Menu(changePropertiesString, "Edit User Properties").
-			path(changePropertiesPath.mkString("/", "/", "")) >>
+		Full(
+			applyPath(Menu(changePropertiesString, "Edit User Properties") / prefix, changePropertiesPath) >>
 			snippetDispatch >>
 			Loc.Template(changePropertiesTemplate) >>
 			testUserIsLoggedIn_?
 		)
 	}
 	
-	val changePasswordPath = prefix :: "change" :: "password" :: Nil
+	val changePasswordPath = "change" :: "password" :: Nil
 	val changePasswordString = "Change Password"
-	def changePasswordMenu: Box[Menuable] = Full(Menu(changePasswordString, "Edit User Password").
-		path(changePasswordPath.mkString("/", "/", "")) >> 
+	def changePasswordMenu: Box[Menuable] = Full(
+		applyPath(Menu(changePasswordString, "Edit User Password") / prefix, changePasswordPath) >>
 		snippetDispatch >>
 		Loc.Template(changePasswordTemplate) >>
 		testUserIsLoggedIn_?

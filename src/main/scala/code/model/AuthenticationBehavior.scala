@@ -15,7 +15,7 @@ trait MetaAuthenticationBehavior[OwnerType <: AuthenticationBehavior[OwnerType]]
 	object curUser extends RequestVar[Box[OwnerType]](Empty)
 	
 	def logInUser(user: OwnerType){
-		logger.info("logging in user with key " + uesr.primaryKey.openOr(0L) )
+		logger.info("logging in user with key " + user.primaryKey.openOr(0L) )
 		curUserPK(user.primaryKey)
 	}
 	
