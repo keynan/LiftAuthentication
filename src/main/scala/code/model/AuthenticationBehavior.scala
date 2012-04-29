@@ -15,7 +15,6 @@ trait MetaAuthenticationBehavior[OwnerType <: AuthenticationBehavior[OwnerType]]
 	object curUser extends RequestVar[Box[OwnerType]](Empty)
 	
 	def logInUser(user: OwnerType){
-		logger.info("logging in user with key " + user.primaryKey.openOr(0L) )
 		curUserPK(user.primaryKey)
 	}
 	
@@ -35,7 +34,6 @@ trait MetaAuthenticationBehavior[OwnerType <: AuthenticationBehavior[OwnerType]]
 			case _ => {
 				curUserPK.is match {
 					case Full(pk) => {
-						logger.info("looking for user " + pk.toString)
 						find(pk) match {
 							// cache the user from look up
 							case Full(user) => {
@@ -54,7 +52,6 @@ trait MetaAuthenticationBehavior[OwnerType <: AuthenticationBehavior[OwnerType]]
 				}
 			}
 		}
-		logger.info("Fetched " + ret.toString())
 		ret
 	}
 	
