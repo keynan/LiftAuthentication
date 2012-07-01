@@ -11,10 +11,14 @@ import net.liftweb.http.{S, SHtml, RequestVar}
 import net.liftweb.util._
 import Helpers._
 
+import ca.dualityStudios.liftAuthentication.helpers.{TabularForms, FormField}
+
+
 trait MetaLocalCredentials[OT <: LocalCredentials[OT]] 
 	extends MetaAuthenticationBehavior[OT] 
 	with LocalCredentials[OT]
-	with Loggable {
+	with TabularForms
+{
 	
 	self: OT =>
 
@@ -28,13 +32,9 @@ trait MetaLocalCredentials[OT <: LocalCredentials[OT]]
 		def enPath(x: String, y: Menuable with WithSlash): Menuable with WithSlash = y / x
 		pathing.foldRight(menu)(enPath)
 	}
-	/*{
-		pathing match {
-			case Nil => menu
-			case x::xs => applyPath((menu / x), xs)
-		}
-	}*/
-
+	
+	lazy val testUserIsLoggedIn_? = Loc.If(() => isLoggedIn_?, () => S.redirectTo(homePage, () => S.notice(S.??("user.not.logged.in"))))
+	lazy val testUserIsLoggedOut_? = Loc.If(() => !isLoggedIn_?, () => S.redirectTo(logoutMenu.toString))
 	val prefix = "user_managment"
 	val loginPath = "login" :: Nil
 	val loginPathString = "Login"
@@ -46,16 +46,6 @@ trait MetaLocalCredentials[OT <: LocalCredentials[OT]]
 		Full(menu)
 	}
 
-/*	
-		Full(Menu(
-			Loc(
-				"Login", 
-				loginPath, 
-				loginPathString, 
-				List(snippetDispatch, Loc.Template(loginTemplate), testUserIsLoggedOut_?)
-			)
-		))
-*/
 	val logoutPath = "logout" :: Nil
 	val logoutPathString = "Logout"
 	def logoutMenu: Box[Menuable] = {
@@ -66,9 +56,6 @@ trait MetaLocalCredentials[OT <: LocalCredentials[OT]]
 		)
 	}
 	
-	
-	lazy val testUserIsLoggedIn_? = Loc.If(() => isLoggedIn_?, () => S.redirectTo(homePage, () => S.notice(S.??("user.not.logged.in"))))
-	lazy val testUserIsLoggedOut_? = Loc.If(() => !isLoggedIn_?, () => S.redirectTo(logoutMenu.toString))
 	
 	val signUpPath = "signUp" :: Nil
 	val signUpPathString = "Sign Up"
@@ -91,15 +78,15 @@ trait MetaLocalCredentials[OT <: LocalCredentials[OT]]
 			testUserIsLoggedIn_?
 		)
 	}
-	
+
 	val changePasswordPath = "change" :: "password" :: Nil
 	val changePasswordString = "Change Password"
-	def changePasswordMenu: Box[Menuable] = Full(
+	def changePasswordMenu: Box[Menuable] = {Full(
 		applyPath(Menu(changePasswordString, "Edit User Password") / prefix, changePasswordPath) >>
 		snippetDispatch >>
 		Loc.Template(changePasswordTemplate) >>
 		testUserIsLoggedIn_?
-	)
+	)}
 	
 	///////////// Behavour ///////////////////////////////////////////////
 
@@ -120,33 +107,29 @@ trait MetaLocalCredentials[OT <: LocalCredentials[OT]]
 	}
 	
 	def initVarsFrom(obj: OT) {
-		logger.info("initializing emailVar")
+		logger.debug("============")
+		logger.debug(obj.email.get)
 		emailVar(obj.email.get)
-		logger.info("emailVar == " + emailVar.is)
+		logger.debug(emailVar.get)
 	}
 	
-	def selector(onSubmit: () => Unit) = 
-		"name=username" #> SHtml.textElem(usernameVar) &
-		"name=password" #> SHtml.passwordElem(passwordVar) &
-		"name=old_password" #> SHtml.passwordElem(oldPasswordVar) &
-		"name=email" #> SHtml.email(emailVar) &
-		"name=confirm_password" #> SHtml.passwordElem(confirmPasswordVar) &
-		"type=submit" #> SHtml.submit("Submit", onSubmit)
 	
 	lazy val snippetDispatch = new Loc.DispatchLocSnippets  {
     def handleFail() = {
 			S.redirectTo(loginMenu.toString)
 		}
 		
+		def id[T](x: T): T = x
+		
 		val dispatch: PartialFunction[String, NodeSeq => NodeSeq] = {
-      case "user.login" => selector(onLoginSubmit)
-			case "user.signup" => selector(onSignUpSubmit)
+      case "user.login" => id
+			case "user.signup" => id
 			
 			case "user.properties" => {
 				currentUser match {
 					case Full(user) => {
 						initVarsFrom(user)
-						selector(onChangePropertiesSubmit)
+						id
 					}
 					case _ => handleFail()
 				}
@@ -154,7 +137,7 @@ trait MetaLocalCredentials[OT <: LocalCredentials[OT]]
 			
 			case "user.change_password" => {
 				currentUser match {
-					case Full(user) => selector(onChangePasswordSubmit)
+					case Full(user) => id
 					case _ => handleFail()
 				}
 			}
@@ -217,6 +200,7 @@ trait MetaLocalCredentials[OT <: LocalCredentials[OT]]
 	
 	
 	
+	
 	/////////////// Templates ////////////////////////////////////////
 	def screenWrap(body: NodeSeq): NodeSeq = {
 		val surrounds = "lift:surround?with=default&amp;at=content"
@@ -225,88 +209,45 @@ trait MetaLocalCredentials[OT <: LocalCredentials[OT]]
 		</div>
 	}
 	
+	def loginTemplate() = {
+		screenWrap(form("post", "user.login", List(
+			FormField("Name:", () => SHtml.textElem(usernameVar)),
+			FormField("Password:", () => SHtml.passwordElem(passwordVar)),
+			FormField("", () => SHtml.submit("Submit", onLoginSubmit))
+		)))
+	}
+	
+	def changePasswordTemplate() = {
+		screenWrap(form("post", "user.change_password", List(
+			FormField("Old Password:", () => SHtml.passwordElem(oldPasswordVar)),
+			FormField("New Password:", () => SHtml.passwordElem(passwordVar)),
+			FormField("Confirm New Password:", () => SHtml.passwordElem(confirmPasswordVar)),
+			FormField("", () => SHtml.submit("Submit", onChangePasswordSubmit))
+		)))
+	}
 	
 	
-	def loginTemplate() = screenWrap(_loginTemplate)
-	def _loginTemplate = 
-		<form method="post">
-			<table class="lift:user.login">
-				<tr>
-					<td>Name:</td>
-					<td><input type="text" name="username" /></td>
-				</tr>
-				<tr>
-					<td>Password:</td>
-					<td><input type="password" name="password" /></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td><input type="submit" value="Submit" /></td>
-				</tr>
-			</table>
-		</form>
+	def changePropertiesFields = List(
+		FormField("Email:", () => {
+			logger.debug("soooo yes? " + emailVar.get)
+			SHtml.email(emailVar)
+			}),
+		FormField("", () => SHtml.submit("Submit", onChangePropertiesSubmit))
+	)
 	
-	def changePasswordTemplate() = screenWrap(_changePasswordTemplate)
-	def _changePasswordTemplate = 
-		<form method="post">
-			<table class="lift:user.change_password">
-				<tr>
-					<td>Old Password:</td>
-					<td><input type="password" name="old_password" /></td>
-				</tr>
-				<tr>
-					<td>New Password:</td>
-					<td><input type="password" name="password" /></td>
-				</tr>
-				<tr>
-					<td>Confirm New Password:</td>
-					<td><input type="password" name="confirm_password" /></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td><input type="submit" value="Submit" /></td>
-				</tr>
-			</table>
-		</form>
+	def changePropertiesTemplate() = {
+		screenWrap(form("post", "user.properties", changePropertiesFields))
+	}
 	
-	def changePropertiesTemplate() = screenWrap(_changePropertiesTemplate)
-	def _changePropertiesTemplate = 
-		<form method="post">
-			<table class="lift:user.properties">
-				<tr>
-					<td>Email:</td>
-					<td><input type="text" name="email" /></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td><input type="submit" value="Submit" /></td>
-				</tr>
-			</table>
-		</form>
-	
-	def signUpTemplate() = screenWrap(_signUpTemplate)
-	def _signUpTemplate = 
-		<form method="post">
-			<table class="lift:user.signup">
-				<tr>
-					<td>Email:</td>
-					<td><input type="text" name="email" /></td>
-				</tr>
-				<tr>
-					<td>Password:</td>
-					<td><input type="password" name="password" /></td>
-				</tr>
-				<tr>
-					<td>Confirm Password:</td>
-					<td><input type="password" name="confirm_password" /></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td><input type="submit" value="Submit" /></td>
-				</tr>
-			</table>
-		</form>
-	
+	def signUpFields = List(
+		FormField("Email:", () => SHtml.email(emailVar)),
+		FormField("Password:", () => SHtml.passwordElem(passwordVar)),
+		FormField("Confirm New Password:", () => SHtml.passwordElem(confirmPasswordVar)),
+		FormField("", () => SHtml.submit("Submit", onSignUpSubmit))
+	)
+	def signUpTemplate() = {
+		screenWrap(form("post", "user.signup", signUpFields))
+	}
 }
 
 trait LocalCredentials[OT <: LocalCredentials[OT]] 
