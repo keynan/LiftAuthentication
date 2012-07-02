@@ -96,6 +96,13 @@ trait MetaLocalCredentials[OT <: LocalCredentials[OT]]
 	object confirmPasswordVar extends RequestVar[String]("")
 	object emailVar extends RequestVar[String]("")
 	
+	val usernameField = FormField("Name:", () => SHtml.textElem(usernameVar))
+	val passwordField = FormField("Password:", () => SHtml.passwordElem(passwordVar))
+	val emailField = FormField("Email:", () => SHtml.email(emailVar))
+	val confirmPasswordField = FormField("Confirm New Password:", () => SHtml.passwordElem(confirmPasswordVar))
+	val oldPasswordField = FormField("Old Password:", () => SHtml.passwordElem(oldPasswordVar))
+	val newPasswordField = FormField("New Password:", () => SHtml.passwordElem(passwordVar))
+	
 	def updateInstance(obj: OT) {
 		obj.email(emailVar.is)
 	}
@@ -119,17 +126,17 @@ trait MetaLocalCredentials[OT <: LocalCredentials[OT]]
 			S.redirectTo(loginMenu.toString)
 		}
 		
-		def id[T](x: T): T = x
-		
 		val dispatch: PartialFunction[String, NodeSeq => NodeSeq] = {
-      case "user.login" => id
-			case "user.signup" => id
+      case "user.login" => fieldRender(List(usernameField, passwordField,
+				FormField("", () => SHtml.submit("Submit", onLoginSubmit))
+			))
+			case "user.signup" => fieldRender(signUpFields)
 			
 			case "user.properties" => {
 				currentUser match {
 					case Full(user) => {
 						initVarsFrom(user)
-						id
+						fieldRender(changePropertiesFields)
 					}
 					case _ => handleFail()
 				}
@@ -137,10 +144,14 @@ trait MetaLocalCredentials[OT <: LocalCredentials[OT]]
 			
 			case "user.change_password" => {
 				currentUser match {
-					case Full(user) => id
+					case Full(user) => fieldRender(List(
+						oldPasswordField, newPasswordField, confirmPasswordField,
+						FormField("", () => SHtml.submit("Submit", onChangePasswordSubmit))
+					))
 					case _ => handleFail()
 				}
 			}
+			
     }
 	}
 
@@ -210,43 +221,27 @@ trait MetaLocalCredentials[OT <: LocalCredentials[OT]]
 	}
 	
 	def loginTemplate() = {
-		screenWrap(form("post", "user.login", List(
-			FormField("Name:", () => SHtml.textElem(usernameVar)),
-			FormField("Password:", () => SHtml.passwordElem(passwordVar)),
-			FormField("", () => SHtml.submit("Submit", onLoginSubmit))
-		)))
+		screenWrap(form("post", "user.login"))
 	}
 	
 	def changePasswordTemplate() = {
-		screenWrap(form("post", "user.change_password", List(
-			FormField("Old Password:", () => SHtml.passwordElem(oldPasswordVar)),
-			FormField("New Password:", () => SHtml.passwordElem(passwordVar)),
-			FormField("Confirm New Password:", () => SHtml.passwordElem(confirmPasswordVar)),
-			FormField("", () => SHtml.submit("Submit", onChangePasswordSubmit))
-		)))
+		screenWrap(form("post", "user.change_password"))
 	}
 	
 	
-	def changePropertiesFields = List(
-		FormField("Email:", () => {
-			logger.debug("soooo yes? " + emailVar.get)
-			SHtml.email(emailVar)
-			}),
+	def changePropertiesFields = List( emailField, 
 		FormField("", () => SHtml.submit("Submit", onChangePropertiesSubmit))
 	)
 	
 	def changePropertiesTemplate() = {
-		screenWrap(form("post", "user.properties", changePropertiesFields))
+		screenWrap(form("post", "user.properties"))
 	}
 	
-	def signUpFields = List(
-		FormField("Email:", () => SHtml.email(emailVar)),
-		FormField("Password:", () => SHtml.passwordElem(passwordVar)),
-		FormField("Confirm New Password:", () => SHtml.passwordElem(confirmPasswordVar)),
+	def signUpFields = List(emailField, passwordField, confirmPasswordField,
 		FormField("", () => SHtml.submit("Submit", onSignUpSubmit))
 	)
 	def signUpTemplate() = {
-		screenWrap(form("post", "user.signup", signUpFields))
+		screenWrap(form("post", "user.signup"))
 	}
 }
 

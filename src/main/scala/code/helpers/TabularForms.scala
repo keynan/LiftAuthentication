@@ -7,10 +7,15 @@ trait TabularForms {
 	
 	import BindHelpers._
 
-	def form(method: String, snippet: String, fields: List[FormField]) = 
-		<form method={method}><table class={"lift:" + snippet}> 
-			{fields.flatMap(applyTemplate(fieldTemplate))} 
-		</table></form>
+	def form(method: String, snippet: String) = 
+		<form method={method}>
+			<table> 
+				<tr class={"lift:" + snippet}>
+					<td class="lbl"></td>
+					<td><input id="inp" /></td>
+				</tr>
+			</table>
+		</form>
 	
 	def applyTemplate(template: NodeSeq)(field: FormField) = {
 		(
@@ -19,12 +24,8 @@ trait TabularForms {
 		).apply(template)
 	}
 	
-	def fieldTemplate = {
-		<tr>
-			<td class="lbl"></td>
-			<td><input id="inp" /></td>
-		</tr>
-	}
+	def fieldRender(fields: List[FormField])(template: NodeSeq): NodeSeq = 
+		fields.flatMap(applyTemplate(template))
 }
 
 case class FormField(val label: String, val input:() => Elem)
