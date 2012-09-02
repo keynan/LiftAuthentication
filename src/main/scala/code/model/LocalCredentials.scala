@@ -108,7 +108,7 @@ trait MetaLocalCredentials[OT <: LocalCredentials[OT]]
 	}
 	
 	def updatePassword(obj: OT) {
-		obj.password(passwordVar.is)
+		obj.password.setList(List(passwordVar.is, confirmPasswordVar.is))
 		//TODO How to handle confirm?
 		/////////////////////////
 	}
