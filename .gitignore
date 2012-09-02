@@ -6,3 +6,7 @@
 /lift_proto.db.*
 /project/target
 
+.idea/*
+*~
+project/project
+.idea_modules

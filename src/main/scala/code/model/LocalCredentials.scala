@@ -96,12 +96,12 @@ trait MetaLocalCredentials[OT <: LocalCredentials[OT]]
 	object confirmPasswordVar extends RequestVar[String]("")
 	object emailVar extends RequestVar[String]("")
 	
-	val usernameField = FormField("Name:", () => SHtml.textElem(usernameVar))
-	val passwordField = FormField("Password:", () => SHtml.passwordElem(passwordVar))
-	val emailField = FormField("Email:", () => SHtml.email(emailVar))
-	val confirmPasswordField = FormField("Confirm New Password:", () => SHtml.passwordElem(confirmPasswordVar))
-	val oldPasswordField = FormField("Old Password:", () => SHtml.passwordElem(oldPasswordVar))
-	val newPasswordField = FormField("New Password:", () => SHtml.passwordElem(passwordVar))
+	val usernameField = FormField("Name:", () => SHtml.textElem(usernameVar, "id" -> "usernameInput"))
+	val passwordField = FormField("Password:", () => SHtml.passwordElem(passwordVar, "id" -> "passwordInput"))
+	val emailField = FormField("Email:", () => SHtml.email(emailVar, "id" -> "emailInput"))
+	val confirmPasswordField = FormField("Confirm New Password:", () => SHtml.passwordElem(confirmPasswordVar, "id" -> "confirmPasswordInput"))
+	val oldPasswordField = FormField("Old Password:", () => SHtml.passwordElem(oldPasswordVar, "id" -> "oldPasswordInput"))
+	val newPasswordField = FormField("New Password:", () => SHtml.passwordElem(passwordVar, "id" -> "newPasswordInput"))
 	
 	def updateInstance(obj: OT) {
 		obj.email(emailVar.is)
