@@ -10,3 +10,5 @@
 *~
 project/project
 .idea_modules
+.idea*
+
