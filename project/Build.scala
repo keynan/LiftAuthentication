@@ -4,7 +4,7 @@ import Keys._
 object BuildSettings {
   val buildOrganization = "dualitystudios"
   val buildVersion      = "0.1"
-  val buildScalaVersion = "2.9.1"
+  val buildScalaVersion = "2.10.0"
 
   val buildSettings = Defaults.defaultSettings ++ Seq (
     organization := buildOrganization,
@@ -15,7 +15,7 @@ object BuildSettings {
 
 object Dependencies {
 
-	val liftVersion = "2.4"
+	val liftVersion = "2.5-RC5"
 	val logbackVer = "0.9.26"
   
 	val lift_webkit = "net.liftweb" %% "lift-webkit" % liftVersion % "compile->default"
